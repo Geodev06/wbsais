@@ -19,6 +19,7 @@ class CreateSuppliersTable extends Migration
             $table->string('address');
             $table->string('contact');
             $table->string('user_id');
+            $table->string('inventory_id');
             $table->timestamps();
         });
     }

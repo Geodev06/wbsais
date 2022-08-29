@@ -22,6 +22,7 @@ class CreateProductsTable extends Migration
             $table->integer('qty');
             $table->decimal('price', 18, 2);
             $table->integer('user_id');
+            $table->string('inventory_id');
             $table->timestamps();
         });
     }

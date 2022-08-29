@@ -21,7 +21,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'store_name',
         'email',
-        'password'
+        'password',
+        'inventory_id'
 
     ];
 

@@ -6,7 +6,7 @@
 	<meta name="author" content="Muhamad Nauval Azhar">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<meta name="description" content="This is a login page template based on Bootstrap 5">
-	<title>Login Page</title>
+	<title>WBSAIS Login </title>
 
 	<link rel="stylesheet" href="{{ asset('assets/bs/css/bootstrap.min.css') }}" />
 	<link rel="stylesheet" href="{{ asset('assets/bs/boxicons.min.css') }}" />
@@ -15,6 +15,9 @@
 	<script src="{{ asset('assets/bs/js/bootstrap.bundle.min.js') }}"></script>
 	<link rel="stylesheet" href="{{ asset('assets/css/app.css') }}" />
 </head>
+<style>
+
+</style>
 
 <body>
 	<section class="h-100">
@@ -27,6 +30,7 @@
 					</div>
 					<div class="card shadow-lg">
 						<div class="card-body p-5">
+
 							@if(Session::has('reset-msg'))
 							<div class="alert alert-success alert-dismissible fade show" role="alert">
 								<strong>Notice</strong>
@@ -34,6 +38,7 @@
 								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 							</div>
 							@endif
+
 							<h1 class="fs-4 card-title fw-bold mb-4">Login</h1>
 							<form method="POST" autocomplete="off" id="login-form">
 								@csrf
@@ -126,9 +131,13 @@
 							$('#alert-modal').modal('toggle');
 
 						} else {
-							$('#login-form')[0].reset();
 							window.location.replace("{{ route('user.dash') }}");
 						}
+					},
+					error: function(e) {
+						$('#login-form :input').prop("disabled", false);
+						$('#msg-error').text(e.responseJSON.message);
+						$('#alert-modal').modal('toggle');
 					}
 				});
 			});

@@ -23,6 +23,7 @@ class CreateReceiptsTable extends Migration
             $table->integer('user_id');
             $table->integer('transaction_id');
             $table->decimal('customer_amount');
+            $table->string('inventory_id');
             $table->timestamps();
         });
     }

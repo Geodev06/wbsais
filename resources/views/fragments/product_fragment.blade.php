@@ -3,13 +3,11 @@
          font-size: 13px;
      }
  </style>
- <script src="{{ asset('assets/dataTables/datatables.js') }}"></script>
- <link rel="stylesheet" href="{{ asset('assets/dataTables/datatables.min.css') }}" />
- <link rel="stylesheet" href="{{ asset('assets/dataTables/datatables.css') }}" />
- <script src="{{ asset('assets/dataTables/datatables.min.js') }}"></script>
  <div class="row">
      <div class="col-lg-12">
+         <h1 class="fw-bold mt-5 fs-4">Products list's</h1>
          <div class="mt-4 d-flex">
+
              <button type="button" class="c-btn d-flex align-items-center me-2" data-bs-toggle="modal" data-bs-target="#add-product-modal">
                  <i class="bx bx-plus fs-4 me-1"></i> Add product
              </button>
@@ -33,6 +31,23 @@
 
              </table>
          </div>
+         <!-- Error modal -->
+         <div class="modal fade" id="alert-modal" tabindex="-1" aria-labelledby="modal-label" aria-hidden="true">
+             <div class="modal-dialog modal-dialog-centered">
+                 <div class="modal-content border-0">
+                     <div class=" flex-alert-container">
+                         <div class="flex-alert-header p-5 rounded-left">
+                             <i class="bx bx-x-circle mx-1 text-danger" style="font-size: 5em;"></i>
+                         </div>
+                         <div class="flex-alert-body bg-white p-5">
+                             <h1 class="fs-3 card-title">Login Error</h1>
+                             <span id="msg-error" style="font-size: 13px;" class="text-muted">Error</span>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+         <!-- End -->
          <script type="text/javascript">
              var table = $('#table-data').DataTable({
                  responsive: true,
@@ -80,6 +95,9 @@
                          var operations = '<a class="btn-edit" data-id="' + record[i][0] + '" data-pname="' + record[i][1] + '" data-supplier="' + record[i][2] + '" data-category="' + record[i][3] + '" data-expiry="' + record[i][4] + '" data-qty="' + record[i][5] + '" data-price="' + record[i][6] + '"> <i class="bx bx-edit me-1"></i></a> <a class="btn-delete" data-id="' + record[i][0] + '" data-pname="' + record[i][1] + '" data-supp="' + record[i][2] + '" data-cat="' + record[i][3] + '" data-exp="' + record[i][4] + '"><i class="bx bx-trash me-1"></i></a>'
                          table.row.add([record[i][0], record[i][1], record[i][2], record[i][3], record[i][4], record[i][5], "\u20B1 " + record[i][6], operations]).draw()
                      }
+                 }).fail(function(e) {
+                     $('#msg-error').text(e.responseJSON.message);
+                     $('#alert-modal').modal('toggle');
                  })
              }
 
@@ -127,8 +145,9 @@
                                  load_data()
                              }
                          },
-                         error: function(err) {
-                             console.log(err)
+                         error: function(e) {
+                             $('#msg-error').text(e.responseJSON.message);
+                             $('#alert-modal').modal('toggle');
                          }
 
                      });
@@ -399,6 +418,10 @@
                          $('#add-product-modal').modal('toggle');
                          $('#alert-modal-success').modal('toggle');
                      }
+                 },
+                 error: function(e) {
+                     $('#msg-error').text(e.responseJSON.message);
+                     $('#alert-modal').modal('toggle');
                  }
 
              });
@@ -430,6 +453,10 @@
                          $('#edit-product-modal').modal('toggle');
                          $('#alert-modal-success').modal('toggle');
                      }
+                 },
+                 error: function(e) {
+                     $('#msg-error').text(e.responseJSON.message);
+                     $('#alert-modal').modal('toggle');
                  }
 
              });

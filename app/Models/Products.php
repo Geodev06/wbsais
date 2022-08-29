@@ -16,6 +16,7 @@ class Products extends Model
         'expiry',
         'qty',
         'price',
-        'user_id'
+        'user_id',
+        'inventory_id'
     ];
 }

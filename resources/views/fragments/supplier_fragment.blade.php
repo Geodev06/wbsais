@@ -3,10 +3,7 @@
          font-size: 13px;
      }
  </style>
- <script src="{{ asset('assets/dataTables/datatables.js') }}"></script>
- <link rel="stylesheet" href="{{ asset('assets/dataTables/datatables.min.css') }}" />
- <link rel="stylesheet" href="{{ asset('assets/dataTables/datatables.css') }}" />
- <script src="{{ asset('assets/dataTables/datatables.min.js') }}"></script>
+
  <div class="row">
      <div class="col-lg-12">
          <div class="mt-4 d-flex">
@@ -232,6 +229,23 @@
      </div>
  </div>
  <!-- End modal -->
+ <!-- Error modal -->
+ <div class="modal fade" id="alert-modal" tabindex="-1" aria-labelledby="modal-label" aria-hidden="true">
+     <div class="modal-dialog modal-dialog-centered">
+         <div class="modal-content border-0">
+             <div class=" flex-alert-container">
+                 <div class="flex-alert-header p-5 rounded-left">
+                     <i class="bx bx-x-circle mx-1 text-danger" style="font-size: 5em;"></i>
+                 </div>
+                 <div class="flex-alert-body bg-white p-5">
+                     <h1 class="fs-3 card-title">Login Error</h1>
+                     <span id="msg-error" style="font-size: 13px;" class="text-muted">Error</span>
+                 </div>
+             </div>
+         </div>
+     </div>
+ </div>
+ <!-- End -->
  <script type="text/javascript">
      $(function() {
          //store supplier
@@ -260,6 +274,10 @@
                          load_data();
                          $('#alert-modal-success').modal('toggle');
                      }
+                 },
+                 error: function(e) {
+                     $('#msg-error').text(e.responseJSON.message);
+                     $('#alert-modal').modal('toggle');
                  }
 
              });
@@ -292,6 +310,10 @@
                          load_data();
                          $('#alert-modal-success').modal('toggle');
                      }
+                 },
+                 error: function(e) {
+                     $('#msg-error').text(e.responseJSON.message);
+                     $('#alert-modal').modal('toggle');
                  }
 
              });
@@ -316,7 +338,8 @@
                      }
                  },
                  error: function(err) {
-                     console.log(err)
+                     $('#msg-error').text(e.responseJSON.message);
+                     $('#alert-modal').modal('toggle');
                  }
 
              });

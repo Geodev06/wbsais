@@ -46,6 +46,12 @@
         .table-container {
             width: 50ch;
         }
+
+        @media screen and (max-width: 840px) {
+            .table-container {
+                width: 30ch;
+            }
+        }
     </style>
 </head>
 

@@ -25,7 +25,7 @@ class CreateUsersTable extends Migration
             $table->integer('role')->nullable(true)->default(0);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('inventory_id')->nullable(true);
+            $table->string('inventory_id');
             $table->rememberToken();
             $table->timestamps();
         });

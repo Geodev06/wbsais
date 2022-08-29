@@ -2,12 +2,13 @@
      .c-fs {
          font-size: 13px;
      }
+
+     .label-inv {
+         color: crimson;
+         font-size: 13px;
+         content: '';
+     }
  </style>
- <script src="{{ asset('chartjs/package/dist/chart.js')}}"></script>
- <script src="{{ asset('assets/dataTables/datatables.js') }}"></script>
- <link rel="stylesheet" href="{{ asset('assets/dataTables/datatables.min.css') }}" />
- <link rel="stylesheet" href="{{ asset('assets/dataTables/datatables.css') }}" />
- <script src="{{ asset('assets/dataTables/datatables.min.js') }}"></script>
  <div class="row mb-5">
      <div class="col-sm-12 col-lg-6 col-md-12 mt-5">
          <p class="fw-bold">Generate report</p>
@@ -31,10 +32,11 @@
          </div>
          <div>
              <!-- table -->
-             <table id="table-report" class="display nowrap w-100 table-striped">
+             <table id="table-report" class="display nowrap w-100 table-striped" width="100%">
                  <thead>
                      <tr style="height: 10px;">
                          <th>Total Revenue</th>
+                         <th>No. of item sold</th>
                          <th>Date</th>
                      </tr>
                  </thead>
@@ -70,10 +72,55 @@
          </div>
      </div>
  </div>
+
+ <!-- Error modal -->
+ <div class="modal fade" id="alert-modal" tabindex="-1" aria-labelledby="modal-label" aria-hidden="true">
+     <div class="modal-dialog modal-dialog-centered">
+         <div class="modal-content border-0">
+             <div class=" flex-alert-container">
+                 <div class="flex-alert-header p-5 rounded-left">
+                     <i class="bx bx-x-circle mx-1 text-danger" style="font-size: 5em;"></i>
+                 </div>
+                 <div class="flex-alert-body bg-white p-5">
+                     <h1 class="fs-3 card-title">Login Error</h1>
+                     <span id="msg-error" style="font-size: 13px;" class="text-muted">Error</span>
+                 </div>
+             </div>
+         </div>
+     </div>
+ </div>
+ <!-- End -->
+
+
  <script type="text/javascript">
      var table = $('#table-report').DataTable({
+         columns: [{
+             "width": "50%"
+         }, {
+             "width": "25%"
+         }, {
+             "width": "25%"
+         }],
+
          dom: 'Bfrtip',
-         button: ['copy', 'csv', 'excel', 'pdf', 'print'],
+         buttons: ['copy',
+             {
+                 extend: 'print',
+                 title: "{{ $data['store_name']}} [Inventory Report]",
+                 messageTop: function() {
+                     return 'Revenue from : ' + $('#from').val() + ' to : ' + $('#to').val()
+                 },
+                 messageBottom: function() {
+                     var today = new Date()
+                     var dd = String(today.getDate()).padStart(2, '0')
+                     var mm = String(today.getMonth() + 1).padStart(2, '0')
+                     var yyyy = today.getFullYear()
+                     today = mm + '-' + dd + '-' + yyyy
+                     return 'Report generated at ' + today
+                 },
+                 className: 'n-btn'
+             }
+         ],
          order: [
              [1, 'desc']
          ],
@@ -86,7 +133,6 @@
      function loadTable() {
          let from = document.getElementById('from').value;
          let to = document.getElementById('to').value;
-         console.log(from)
 
          let uri = "{{ route('report.get') }}";
          return $.ajax({
@@ -102,15 +148,35 @@
                  $('#loader').css('display', 'flex');
              }
          }).done(function(data) {
-             console.log(data.transactions)
+
+             const ttl = data.transactions.reduce((acc, obj) => {
+                 return acc + parseFloat(obj.amount)
+             }, 0)
+
+             const tqty = data.transactions.reduce((acc, obj) => {
+                 return acc + parseFloat(obj.totalqty)
+             }, 0)
+
              $('#loader').css('display', 'none')
              table.clear().draw()
 
              for (let i = 0; i < data.transactions.length; i++) {
-                 table.row.add(["\u20B1 " + data.transactions[i].amount, data.transactions[i].date, ]).draw()
+                 table.row.add(["\u20B1 " + data.transactions[i].amount, data.transactions[i].totalqty, data.transactions[i].date, ]).draw()
              }
+
+             table.row.add(['<b>Total revenue </b>: \u20B1 ' + ttl.toFixed(2), '<b>Total No. of items sold : </b>' + tqty, '']).draw()
+
+             table.row.add(['', '<span class="label-inv">Inventory Details</span>', '']).draw()
+             table.row.add(['<b>Items in Inventory</b> : ' + "{{ $data['inventory']}} ", '<b>Items in Inventory(qty)</b> : ' + "{{ $data['inventory_qty']}} ", '']).draw()
+             table.row.add(['<b>Expiry items</b> : ' + "{{ $data['exp_items_no']}} ", '<b>Critical items</b> : ' + "{{ $data['critical_items']}} ", '']).draw()
+             table.row.add(['<b>No of supplier</b> : ' + "{{ $data['supplier']}} ", '<b>Connected accounts</b> : ' + "{{ $data['connected']}} ", '']).draw()
+             table.row.add(['<b>Total expenses</b> : \u20B1 ' + data.expenses[0].amount, '', '']).draw()
+         }).fail(function(e) {
+             $('#msg-error').text(e.responseJSON.message);
+             $('#alert-modal').modal('toggle');
          })
      }
+
      loadTable();
 
      function load_chart(chart_data) {
@@ -152,7 +218,6 @@
 
          let e = document.getElementById('days');
          let value = e.value;
-         console.log(value)
          $.ajax({
              url: "{{ route('revenue.get') }}",
              type: 'post',
@@ -166,9 +231,11 @@
              if (data.status == 200) {
                  $('#revenueChart').remove();
                  $('.report-div').append('<canvas id="revenueChart" height="80%" width="100%"></canvas>')
-                 console.log(data.details)
                  load_chart(data.details)
              }
+         }).fail(function(e) {
+             $('#msg-error').text(e.responseJSON.message);
+             $('#alert-modal').modal('toggle');
          })
      }
      getdata()

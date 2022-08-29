@@ -17,6 +17,7 @@ class CreateCategoriesTable extends Migration
             $table->id();
             $table->string('category');
             $table->integer('user_id');
+            $table->string('inventory_id');
             $table->timestamps();
         });
     }

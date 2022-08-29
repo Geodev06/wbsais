@@ -13,6 +13,13 @@
   <script src="{{ asset('assets/js/popper.min.js') }}"></script>
   <script src="{{ asset('assets/bs/js/bootstrap.bundle.min.js') }}"></script>
   <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}" />
+  <script src="{{ asset('chartjs/package/dist/chart.js')}}"></script>
+  <script src="{{ asset('chartjs/datalabels.min.js')}}"></script>
+  <script src="{{ asset('assets/dataTables/datatables.js') }}"></script>
+  <link rel="stylesheet" href="{{ asset('assets/dataTables/datatables.min.css') }}" />
+  <link rel="stylesheet" href="{{ asset('assets/dataTables/datatables.css') }}" />
+  <script src="{{ asset('assets/dataTables/datatables.min.js') }}"></script>
+
 
   <style type="text/css">
     .custom-i-size {
@@ -119,6 +126,7 @@
     }
 
     .nav_link {
+      cursor: pointer;
       position: relative;
       color: var(--first-color-light);
       margin-bottom: 10px;
@@ -186,7 +194,6 @@
     .icon-container {
       height: 60px;
       width: 60px;
-      background: linear-gradient(to top left, #660066 0%, #cc0099 100%);
       border-radius: 12px;
       display: flex;
       justify-content: center;
@@ -202,6 +209,26 @@
       color: rgb(45, 45, 45);
       font-weight: 600;
     }
+
+    .disable-link {
+      color: rgb(120, 120, 120);
+      pointer-events: none;
+    }
+
+    #div-products {
+      display: none;
+    }
+
+    .initial {
+      height: 30px;
+      width: 30px;
+      background-color: dodgerblue;
+      color: white;
+      border-radius: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   </style>
 </head>
 
@@ -210,45 +237,71 @@
     <div class="header_toggle">
       <i class="bx bx-menu" id="header-toggle"> <span class="ds-name"></span></i>
     </div>
+    <div class="avatar-container d-flex align-items-center">
+      <div class="initial me-2">{{ucfirst($data['fullname'][0])}}</div>
+      <div class="name-container"><b>Hello!</b>, {{$data['fullname']}}</div>
+    </div>
   </header>
 
   <div class="l-navbar" id="nav-bar">
     <nav class="nav">
       <div>
-        <a href="#" class="nav_logo">
+        <a href="" class="nav_logo" id="logo">
           <i class="bx bx-layer nav_logo-icon"></i>
           <span class="nav_logo-name">WBSAIS</span>
         </a>
-
         <div class="nav_list">
-          <a href="" class="nav_link active" id="dashboard">
+
+          <a class="nav_link" id="dashboard">
             <i class="bx bx-home-alt-2 nav_icon"></i>
             <span class="nav_name">Dashboard</span>
           </a>
-          <a href="" class="nav_link" id="product-view">
-            <i class="bx bx-grid-alt nav_icon"></i>
-            <span class="nav_name">Products</span>
+
+          <a class="nav_link" id="btn-product-div">
+            <i class="bx bx-list-ul nav_icon"></i>
+            <span class="nav_name">Manage products</span>
           </a>
-          <a href="" class="nav_link" id="category-view">
-            <i class="bx bx-category nav_icon"></i>
-            <span class="nav_name">Categories</span>
-          </a>
-          <a href="" class="nav_link" id="supplier-view">
-            <i class="bx bx-package nav_icon"></i>
-            <span class="nav_name">Suppliers</span>
-          </a>
-          <a href="" class="nav_link" id="sale-view">
+
+          <div id="div-products">
+            <a class="nav_link" id="product-view">
+              <i class="bx bx-grid-alt nav_icon"></i>
+              <span class="nav_name">Products</span>
+            </a>
+            <a class="nav_link" id="category-view">
+              <i class="bx bx-category nav_icon"></i>
+              <span class="nav_name">Categories</span>
+            </a>
+            <a class="nav_link" id="supplier-view">
+              <i class="bx bx-package nav_icon"></i>
+              <span class="nav_name">Suppliers</span>
+            </a>
+          </div>
+          <a class="nav_link" id="sale-view">
             <i class="bx bx-cart-alt nav_icon"></i>
-            <span class="nav_name">Sale</span>
+            <span class="nav_name">Issue Items</span>
           </a>
-          <a href="" class="nav_link" id="setting-view">
-            <i class="bx bx-user nav_icon"></i>
-            <span class="nav_name">Profile</span>
+          <a class="nav_link" id="expenses-view">
+            <i class="bx bx-trending-up nav_icon"></i>
+            <span class="nav_name">Expenses</span>
           </a>
-          <a href="" class="nav_link" id="report-view">
+          <a class="nav_link" id="setting-view">
+            <i class="bx bx-cog nav_icon"></i>
+            <span class="nav_name">Settings</span>
+          </a>
+          <a class="nav_link" id="report-view">
             <i class="bx bx-receipt nav_icon"></i>
             <span class="nav_name">Reports</span>
           </a>
+          <a class="nav_link" id="analysis-view">
+            <i class="bx bx-line-chart-down nav_icon"></i>
+            <span class="nav_name">Analysis</span>
+          </a>
+
+          <a class="nav_link" id="logs-view">
+            <i class="bx bx-history nav_icon"></i>
+            <span class="nav_name">History</span>
+          </a>
+
         </div>
       </div>
       <a href="" id="btn-log-out" class="nav_link">
@@ -262,8 +315,8 @@
   <div class="loader-container" id="loader">
     <img src="{{asset('assets/img/load.gif')}}" />
   </div>
-  <div class="">
-    <div class="container " id="content">
+  <div>
+    <div class="container" id="content">
     </div>
   </div>
   <!-- logout modal -->
@@ -291,6 +344,24 @@
     </div>
   </div>
   <!-- End modal -->
+
+  <!-- Error modal -->
+  <div class="modal fade" id="alert-modal" tabindex="-1" aria-labelledby="modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0">
+        <div class=" flex-alert-container">
+          <div class="flex-alert-header p-5 rounded-left">
+            <i class="bx bx-x-circle mx-1 text-danger" style="font-size: 5em;"></i>
+          </div>
+          <div class="flex-alert-body bg-white p-5">
+            <h1 class="fs-3 card-title">Error</h1>
+            <span id="msg-error" style="font-size: 13px;" class="text-muted">Error</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End -->
 </body>
 <script type="text/javascript">
   document.addEventListener("DOMContentLoaded", function(event) {
@@ -328,7 +399,36 @@
   });
 
   $(function() {
-    //product fragment
+
+    let counter = 0
+    $('#btn-product-div').on('click', function(e) {
+      e.preventDefault()
+      $('#div-products').slideToggle()
+    })
+    //logo fragment
+    $('#logo').on('click', function(e) {
+      e.preventDefault();
+      $.ajax({
+        url: "{{ route('dashboard.fragment') }}",
+        type: 'get',
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        beforeSend: function() {
+          $('a').addClass('disable-link')
+          $('#content').html('')
+          $('#loader').css('display', 'flex')
+        }
+      }).done(function(data) {
+        $('a').removeClass('disable-link')
+        $('#loader').css('display', 'none')
+        $('#content').html(data.content)
+      }).fail(function(e) {
+        $('#msg-error').text(e.responseJSON.message);
+        $('#alert-modal').modal('toggle');
+      });
+    });
+    //dashboard fragment
     $('#dashboard').on('click', function(e) {
       e.preventDefault();
       $.ajax({
@@ -338,12 +438,17 @@
         processData: false,
         contentType: false,
         beforeSend: function() {
+          $('a').addClass('disable-link')
           $('#content').html('')
           $('#loader').css('display', 'flex')
         }
       }).done(function(data) {
+        $('a').removeClass('disable-link')
         $('#loader').css('display', 'none')
         $('#content').html(data.content)
+      }).fail(function(e) {
+        $('#msg-error').text(e.responseJSON.message);
+        $('#alert-modal').modal('toggle');
       });
     });
     //product fragment
@@ -356,12 +461,18 @@
         processData: false,
         contentType: false,
         beforeSend: function() {
+          $('a').addClass('disable-link')
           $('#content').html('')
           $('#loader').css('display', 'flex')
         },
         success: function(data) {
+          $('a').removeClass('disable-link')
           $('#loader').css('display', 'none')
           $('#content').html(data.content)
+        },
+        error: function(e) {
+          $('#msg-error').text(e.responseJSON.message);
+          $('#alert-modal').modal('toggle');
         }
       })
     })
@@ -375,12 +486,18 @@
         processData: false,
         contentType: false,
         beforeSend: function() {
+          $('a').addClass('disable-link')
           $('#content').html('')
           $('#loader').css('display', 'flex')
         },
         success: function(data) {
+          $('a').removeClass('disable-link')
           $('#loader').css('display', 'none')
           $('#content').html(data.content)
+        },
+        error: function(e) {
+          $('#msg-error').text(e.responseJSON.message);
+          $('#alert-modal').modal('toggle');
         }
       })
     })
@@ -394,12 +511,18 @@
         processData: false,
         contentType: false,
         beforeSend: function() {
+          $('a').addClass('disable-link')
           $('#content').html('')
           $('#loader').css('display', 'flex')
         },
         success: function(data) {
+          $('a').removeClass('disable-link')
           $('#loader').css('display', 'none')
           $('#content').html(data.content)
+        },
+        error: function(e) {
+          $('#msg-error').text(e.responseJSON.message);
+          $('#alert-modal').modal('toggle');
         }
       })
     })
@@ -413,12 +536,44 @@
         processData: false,
         contentType: false,
         beforeSend: function() {
+          $('a').addClass('disable-link')
           $('#content').html('')
           $('#loader').css('display', 'flex')
         },
         success: function(data) {
+          $('a').removeClass('disable-link')
           $('#loader').css('display', 'none')
           $('#content').html(data.content)
+        },
+        error: function(e) {
+          $('#msg-error').text(e.responseJSON.message);
+          $('#alert-modal').modal('toggle');
+        }
+      })
+    })
+
+    //expenses fragment
+    $('#expenses-view').on('click', function(e) {
+      e.preventDefault();
+      $.ajax({
+        url: "{{ route('expenses.fragment')}}",
+        type: 'get',
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        beforeSend: function() {
+          $('a').addClass('disable-link')
+          $('#content').html('')
+          $('#loader').css('display', 'flex')
+        },
+        success: function(data) {
+          $('a').removeClass('disable-link')
+          $('#loader').css('display', 'none')
+          $('#content').html(data.content)
+        },
+        error: function(e) {
+          $('#msg-error').text(e.responseJSON.message);
+          $('#alert-modal').modal('toggle');
         }
       })
     })
@@ -433,12 +588,18 @@
         processData: false,
         contentType: false,
         beforeSend: function() {
+          $('a').addClass('disable-link')
           $('#content').html('')
           $('#loader').css('display', 'flex')
         },
         success: function(data) {
+          $('a').removeClass('disable-link')
           $('#loader').css('display', 'none')
           $('#content').html(data.content)
+        },
+        error: function(e) {
+          $('#msg-error').text(e.responseJSON.message);
+          $('#alert-modal').modal('toggle');
         }
       })
     })
@@ -453,12 +614,70 @@
         processData: false,
         contentType: false,
         beforeSend: function() {
+          $('a').addClass('disable-link')
           $('#content').html('')
           $('#loader').css('display', 'flex')
         },
         success: function(data) {
+          $('a').removeClass('disable-link')
           $('#loader').css('display', 'none')
           $('#content').html(data.content)
+        },
+        error: function(e) {
+          $('#msg-error').text(e.responseJSON.message);
+          $('#alert-modal').modal('toggle');
+        }
+      })
+    })
+
+    //analysis fragment
+    $('#analysis-view').on('click', function(e) {
+      e.preventDefault();
+      $.ajax({
+        url: "{{ route('analysis.fragment')}}",
+        type: 'get',
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        beforeSend: function() {
+          $('a').addClass('disable-link')
+          $('#content').html('')
+          $('#loader').css('display', 'flex')
+        },
+        success: function(data) {
+          $('a').removeClass('disable-link')
+          $('#loader').css('display', 'none')
+          $('#content').html(data.content)
+        },
+        error: function(e) {
+          $('#msg-error').text(e.responseJSON.message);
+          $('#alert-modal').modal('toggle');
+        }
+      })
+    })
+
+    //logs fragment
+    $('#logs-view').on('click', function(e) {
+      e.preventDefault();
+      $.ajax({
+        url: "{{ route('logs.fragment')}}",
+        type: 'get',
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        beforeSend: function() {
+          $('a').addClass('disable-link')
+          $('#content').html('')
+          $('#loader').css('display', 'flex')
+        },
+        success: function(data) {
+          $('a').removeClass('disable-link')
+          $('#loader').css('display', 'none')
+          $('#content').html(data.content)
+        },
+        error: function(e) {
+          $('#msg-error').text(e.responseJSON.message);
+          $('#alert-modal').modal('toggle');
         }
       })
     })
@@ -480,26 +699,34 @@
           if (data.status == 1) {
             window.location.replace("{{ route('wbsais.login') }}");
           }
+        },
+        error: function(e) {
+          $('#msg-error').text(e.responseJSON.message);
+          $('#alert-modal').modal('toggle');
         }
       });
     });
-
   })
 
   $(window).on('load', function() {
     $.ajax({
-      url: "{{ route('report.fragment') }}",
+      url: "{{ route('dashboard.fragment') }}",
       type: 'get',
       dataType: 'json',
       processData: false,
       contentType: false,
       beforeSend: function() {
+        $('a').addClass('disable-link')
         $('#content').html('')
         $('#loader').css('display', 'flex')
       }
     }).done(function(data) {
+      $('a').removeClass('disable-link')
       $('#loader').css('display', 'none')
       $('#content').html(data.content)
+    }).fail(function(e) {
+      $('#msg-error').text(e.responseJSON.message);
+      $('#alert-modal').modal('toggle');
     })
   })
 </script>

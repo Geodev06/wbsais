@@ -8,6 +8,7 @@ use App\Models\Stash;
 use App\Models\transactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Monolog\Handler\IFTTTHandler;
 use Validator;
 
@@ -17,11 +18,11 @@ class Salecontroller extends Controller
     {
         if (Auth::check()) {
             $products = Products::select('id', 'product_name', 'category', 'qty', 'price', 'user_id')
-                ->where('user_id', '=', Auth::user()->id)
+                ->where('inventory_id', '=', Auth::user()->inventory_id)
                 ->get();
             return response()->json(['status' => 200, 'products' => $products]);
         } else {
-            echo "Forbidden request";
+            return Redirect::route('forbidden');
         }
     }
 
@@ -35,7 +36,7 @@ class Salecontroller extends Controller
 
             return response()->json(['status' => 200, 'products' => $products, 'amount' => $total_amount]);
         } else {
-            echo "Forbidden request";
+            return Redirect::route('forbidden');
         }
     }
 
@@ -43,7 +44,10 @@ class Salecontroller extends Controller
     {
         if (request()->ajax()) {
 
-            $current_stock = Products::select('qty')->where('id', '=', $request->product_id)->where('user_id', '=', Auth::user()->id)->get();
+            $current_stock = Products::select('qty')
+                ->where('id', '=', $request->product_id)
+                ->where('inventory_id', '=', Auth::user()->inventory_id)
+                ->get();
 
             if ($request->qty <= $current_stock[0]['qty']) {
 
@@ -76,12 +80,16 @@ class Salecontroller extends Controller
                             // $total_amount = Stash::where('user_id', Auth::user()->id)->sum('price');
                             return response()->json(['status' => 200, 'msg' => 'Product added!']);
                         } else {
-                            echo "Forbidden request";
+                            return Redirect::route('forbidden');
                         }
                     } else {
 
                         //update stash
-                        $current_values = Stash::select('qty', 'price')->where('product_id', '=', $request->product_id)->where('user_id', '=', Auth::user()->id)->get();
+                        $current_values = Stash::select('qty', 'price')
+                            ->where('product_id', '=', $request->product_id)
+                            ->where('user_id', '=', Auth::user()->id)
+                            ->get();
+
                         $qty_val = ($current_values[0]['qty'] + $request->qty);
 
                         if ($current_values[0]['qty'] <= $current_stock[0]['qty'] && $qty_val <= $current_stock[0]['qty']) {
@@ -100,7 +108,7 @@ class Salecontroller extends Controller
 
                                 return response()->json(['status' => 200, 'msg' => 'Stash updated!']);
                             } else {
-                                echo "Forbidded request";
+                                return Redirect::route('forbidden');
                             }
                             //end
                         } else {
@@ -121,7 +129,7 @@ class Salecontroller extends Controller
 
             $original_price = Products::select('price')
                 ->where('id', '=', $request->product_id)
-                ->where('user_id', '=', Auth::user()->id)
+                ->where('inventory_id', '=', Auth::user()->inventory_id)
                 ->get();
 
             $validator = Validator::make($request->all(), [
@@ -133,7 +141,9 @@ class Salecontroller extends Controller
 
                 $new_price = ($request->qty * $original_price[0]['price']);
 
-                $current_stock = Products::select('qty')->where('id', '=', $request->product_id)->where('user_id', '=', Auth::user()->id)->get();
+                $current_stock = Products::select('qty')->where('id', '=', $request->product_id)
+                    ->where('inventory_id', '=', Auth::user()->inventory_id)
+                    ->get();
 
                 if ($request->qty <= $current_stock[0]['qty']) {
                     //get original price
@@ -149,7 +159,7 @@ class Salecontroller extends Controller
 
                         return response()->json(['status' => 200, 'msg' => 'Stash updated!']);
                     } else {
-                        echo "Forbidded request";
+                        return Redirect::route('forbidden');
                     }
                     //end
                 } else {
@@ -168,26 +178,32 @@ class Salecontroller extends Controller
                 ->delete();
             return response()->json(['status' => 200, 'msg' => 'Product has been removed from stash!']);
         } else {
-            echo "Forbidded request";
+            return Redirect::route('forbidden');
         }
     }
 
     function receipt($transaction_id, $user_id)
     {
-        $data = Receipt::select('product_id', 'product_name', 'category', 'qty', 'price', 'transaction_id', 'customer_amount', 'created_at')
-            ->where('user_id', '=', $user_id)
-            ->where('transaction_id', '=', $transaction_id)
-            ->get();
-        $store_info = [
-            'store_name' => Auth::user()->store_name,
-            'store_email' => Auth::user()->email,
-            'contact' => Auth::user()->contact,
-            'address' => Auth::user()->address
-        ];
-        $item_count = count($data);
-        $total_amount = Receipt::where('user_id', '=', $user_id)
-            ->where('transaction_id', '=', $transaction_id)->sum('price');
-        return view('fragments.receipt', compact('data', 'store_info', 'total_amount', 'item_count'));
+        if (Auth::check()) {
+            $data = Receipt::select('product_id', 'product_name', 'category', 'qty', 'price', 'transaction_id', 'customer_amount', 'created_at')
+                ->where('user_id', '=', $user_id)
+                ->where('inventory_id', '=', Auth::user()->inventory_id)
+                ->where('transaction_id', '=', $transaction_id)
+                ->get();
+            $store_info = [
+                'store_name' => Auth::user()->store_name,
+                'store_email' => Auth::user()->email,
+                'contact' => Auth::user()->contact,
+                'address' => Auth::user()->address
+            ];
+            $item_count = count($data);
+            $total_amount = Receipt::where('user_id', '=', $user_id)
+                ->where('inventory_id', '=', Auth::user()->inventory_id)
+                ->where('transaction_id', '=', $transaction_id)->sum('price');
+            return view('fragments.receipt', compact('data', 'store_info', 'total_amount', 'item_count'));
+        } else {
+            return Redirect::route('forbidden');
+        }
     }
 
     public function store_transaction($customer_amount)
@@ -195,8 +211,11 @@ class Salecontroller extends Controller
         if (request()->ajax()) {
 
             if (Auth::check()) {
+
                 $stash = Stash::select('product_id', 'product_name', 'category', 'qty', 'price', 'user_id')
-                    ->where('user_id', '=', Auth::user()->id)->get()->toArray();
+                    ->where('user_id', '=', Auth::user()->id)
+                    ->get()
+                    ->toArray();
 
 
                 if (count($stash) > 0) {
@@ -207,9 +226,10 @@ class Salecontroller extends Controller
 
                         $current_stock = Products::select('qty', 'product_name')
                             ->where('id', '=', $stash[$i]['product_id'])
-                            ->where('user_id', '=', Auth::user()->id)
+                            ->where('inventory_id', '=', Auth::user()->inventory_id)
                             ->get()
                             ->toArray();
+
                         $deducted_qty = [
                             'id' => $stash[$i]['product_id'],
                             'qty' => (($current_stock[0]['qty']) - $stash[$i]['qty']),
@@ -217,23 +237,27 @@ class Salecontroller extends Controller
                         ];
                         array_push($updated_qty, $deducted_qty);
                         Products::where('id', '=', $stash[$i]['product_id'])
-                            ->where('user_id', '=', Auth::user()->id)
+                            ->where('inventory_id', '=', Auth::user()->inventory_id)
                             ->update($updated_qty[$i]);
                     }
 
-                    $amount = Stash::where('user_id', '=', Auth::user()->id)->sum('price');
+                    $amount = Stash::where('user_id', '=', Auth::user()->id)
+                        ->sum('price');
+                    $no_of_items = Stash::where('user_id', Auth::user()->id)->sum('qty');
                     $items = [];
                     for ($i = 0; $i < count($stash); $i++) {
                         array_push($items, $stash[$i]['product_name']);
                     }
 
-                    $data = [
+                    $transaction_data = [
                         'items' => serialize($items),
+                        'no_of_items' => $no_of_items,
                         'amount' => $amount,
                         'customer_amount' => $customer_amount,
-                        'user_id' => Auth::user()->id
+                        'user_id' => Auth::user()->id,
+                        'inventory_id' => Auth::user()->inventory_id
                     ];
-                    $transaction = transactions::create($data);
+                    $transaction = transactions::create($transaction_data);
                     for ($i = 0; $i < count($stash); $i++) {
                         # code...
                         $receipt_entry = [
@@ -244,18 +268,23 @@ class Salecontroller extends Controller
                             'price' => $stash[$i]['price'],
                             'user_id' => Auth::user()->id,
                             'transaction_id' => $transaction->id,
-                            'customer_amount' => $customer_amount
+                            'customer_amount' => $customer_amount,
+                            'inventory_id' => Auth::user()->inventory_id
                         ];
+
                         Receipt::create($receipt_entry);
                     }
-                    $receipt_param = ['transaction_id' => $transaction->id, 'user_id' => Auth::user()->id, 'customer_amount' => $customer_amount];
-                    Stash::where('user_id', '=', Auth::user()->id)->delete();
+                    $receipt_param = ['transaction_id' => $transaction->id, 'user_id' => Auth::user()->id];
+
+                    Stash::where('user_id', '=', Auth::user()->id)
+                        ->delete();
+
                     return response()->json(['status' => 200, 'msg' => 'Transaction ended!', 'link' => route('receipt.print', $receipt_param)]);
                 } else {
                     return response()->json(['status' => 0, 'msg' => 'no items in stash']);
                 }
             } else {
-                echo "Forbidden request";
+                return Redirect::route('forbidden');
             }
         }
     }

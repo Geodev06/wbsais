@@ -12,6 +12,7 @@ class Suppliers extends Model
         'supplier',
         'address',
         'contact',
-        'user_id'
+        'user_id',
+        'inventory_id'
     ];
 }

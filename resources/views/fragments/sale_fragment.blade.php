@@ -8,12 +8,10 @@
          padding: 8px 10px;
      }
  </style>
- <script src="{{ asset('assets/dataTables/datatables.js') }}"></script>
- <link rel="stylesheet" href="{{ asset('assets/dataTables/datatables.min.css') }}" />
- <link rel="stylesheet" href="{{ asset('assets/dataTables/datatables.css') }}" />
- <script src="{{ asset('assets/dataTables/datatables.min.js') }}"></script>
  <div class="row">
-     <div class="col-lg-6 col-md-6 col-sm-12 mt-5">
+     <h1 class="fw-bold fs-4 mt-4 mb-0">Sell items</h1>
+     <div class="col-lg-6 col-md-6 col-sm-12 mt-2">
+
          <div>
              <table id="table-data" class="display nowrap w-100 table-striped">
                  <thead>
@@ -29,7 +27,8 @@
              </table>
          </div>
      </div>
-     <div class="col-lg-6 col-md-6 col-sm-12 mt-5">
+
+     <div class="col-lg-6 col-md-6 col-sm-12 mt-2">
          <div>
              <table id="stash-table-data" class="display nowrap w-100 table-striped">
                  <thead>
@@ -53,6 +52,23 @@
          </div>
      </div>
  </div>
+ <!-- Error modal -->
+ <div class="modal fade" id="alert-modal" tabindex="-1" aria-labelledby="modal-label" aria-hidden="true">
+     <div class="modal-dialog modal-dialog-centered">
+         <div class="modal-content border-0">
+             <div class=" flex-alert-container">
+                 <div class="flex-alert-header p-5 rounded-left">
+                     <i class="bx bx-x-circle mx-1 text-danger" style="font-size: 5em;"></i>
+                 </div>
+                 <div class="flex-alert-body bg-white p-5">
+                     <h1 class="fs-3 card-title">Login Error</h1>
+                     <span id="msg-error" style="font-size: 13px;" class="text-muted">Error</span>
+                 </div>
+             </div>
+         </div>
+     </div>
+ </div>
+ <!-- End -->
  <script type="text/javascript">
      var table = $('#table-data').DataTable({
          'lengthMenu': [
@@ -91,6 +107,9 @@
                  var operations = '<a class="y-btn add-to-stash-btn w-100" data-id="' + record[i][0] + '"  data-pname="' + record[i][1] + '" data-category="' + record[i][2] + '" data-qty="' + record[i][3] + '" data-price="' + record[i][4] + '" data-uid="' + record[i][5] + '" > <i class="bx bx-cart-add me-1"></i></a>'
                  table.row.add([record[i][1], record[i][2], record[i][3], "\u20B1 " + record[i][4], operations]).draw()
              }
+         }).fail(function(e) {
+             $('#msg-error').text(e.responseJSON.message);
+             $('#alert-modal').modal('toggle');
          })
      }
 
@@ -102,8 +121,7 @@
              e.preventDefault();
 
              if (parseFloat($('#user_amount').val()) >= parseFloat($('#user_amount')[0].dataset.due)) {
-                 console.log(typeof(parseFloat($('#user_amount').val())))
-                 console.log(typeof(parseFloat($('#user_amount')[0].dataset.due)))
+
                  let temp_uri = "{{ route('transaction.store',':user_amount') }}";
                  $.ajax({
                      url: temp_uri.replace(':user_amount', $('#user_amount').val()),
@@ -126,9 +144,11 @@
                              $('#alert-modal-success').modal('toggle')
                              $('#msg-content').text(data.msg)
                          }
-                         console.log(data.msg)
                      },
-                     error: function(err) {}
+                     error: function(e) {
+                         $('#msg-error').text(e.responseJSON.message);
+                         $('#alert-modal').modal('toggle');
+                     }
                  })
 
              } else {
@@ -221,8 +241,9 @@
                      $('.error_request').text(data.error_request)
                  }
              },
-             error: function(err) {
-                 console.log(err)
+             error: function(e) {
+                 $('#msg-error').text(e.responseJSON.message);
+                 $('#alert-modal').modal('toggle');
              }
 
          });
@@ -299,6 +320,9 @@
                  var operations = '<a class="y-btn edit-stash-btn w-100" data-id="' + stash_items[i][1] + '"  data-pname="' + stash_items[i][2] + '" data-category="' + stash_items[i][3] + '" data-qty="' + stash_items[i][4] + '" data-price="' + stash_items[i][5] + '" data-uid="' + stash_items[i][6] + '" > <i class="bx bx-dots-horizontal me-1"></i></a> <a class="n-btn remove-stash-btn w-100" data-id="' + stash_items[i][1] + '"  data-pname="' + stash_items[i][2] + '" data-category="' + stash_items[i][2] + '" data-qty="' + stash_items[i][3] + '" data-price="' + stash_items[i][4] + '" data-uid="' + stash_items[i][5] + '" > <i class="bx bx-trash me-1"></i></a>'
                  table_stash.row.add([stash_items[i][2], stash_items[i][3], stash_items[i][4], "\u20B1 " + stash_items[i][5], operations]).draw()
              }
+         }).fail(function(e) {
+             $('#msg-error').text(e.responseJSON.message);
+             $('#alert-modal').modal('toggle');
          })
      }
 
@@ -336,8 +360,9 @@
                      $('.error_request').text(data.error_request)
                  }
              },
-             error: function(err) {
-                 console.log(err)
+             error: function(e) {
+                 $('#msg-error').text(e.responseJSON.message);
+                 $('#alert-modal').modal('toggle');
              }
 
          });
@@ -362,8 +387,9 @@
                      load_stash_data()
                  }
              },
-             error: function(err) {
-                 console.log(err)
+             error: function(e) {
+                 $('#msg-error').text(e.responseJSON.message);
+                 $('#alert-modal').modal('toggle');
              }
 
          });

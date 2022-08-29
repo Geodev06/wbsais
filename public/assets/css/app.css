@@ -1,5 +1,5 @@
 .c-btn {
-    background: linear-gradient(to top left, #660066 0%, #cc0099 100%);
+    background-color: dodgerblue;
     outline: none;
     border-radius: 5px;
     color: white;
@@ -10,7 +10,7 @@
 }
 
 .c-btn:hover {
-    background: linear-gradient(to top left, #660066 0%, #cc0099 80%);
+    background-color: rgb(32, 127, 223);
 }
 
 body {
@@ -121,7 +121,7 @@ body {
 }
 
 .pagination>li>a {
-    color: #6600cc;
+    color: dodgerblue;
 }
 
 .pagination>li>a,
@@ -131,13 +131,25 @@ body {
 
 .pagination>li.active>a,
 .pagination>li.active>span {
-    background-color: #660066 !important;
+    background-color: dodgerblue !important;
     border: 1px solid white !important;
     color: white !important;
 }
 
 .pagination>li:hover>a,
 .pagination>li:hover>span {
-    background-color: #660066 !important;
+    background-color: dodgerblue !important;
     color: white !important;
+}
+
+input:focus,
+input:active {
+    outline: 0px !important;
+    -webkit-appearance: none;
+    box-shadow: none !important;
+}
+
+.form-control:focus {
+    border-color: dodgerblue;
+    box-shadow: 0 0 0 0.2rem rgb(21, 66, 172);
 }

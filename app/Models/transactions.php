@@ -12,8 +12,10 @@ class transactions extends Model
     protected $fillable = [
         'transaction_id',
         'items',
+        'no_of_items',
         'amount',
         'customer_amount',
         'user_id',
+        'inventory_id'
     ];
 }

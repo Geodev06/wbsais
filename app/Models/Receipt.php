@@ -16,6 +16,7 @@ class Receipt extends Model
         'price',
         'user_id',
         'transaction_id',
-        'customer_amount'
+        'customer_amount',
+        'inventory_id'
     ];
 }
