@@ -5,5 +5,3 @@ a requirement for undergraduate thesis. the system uses apriori algorithm for fr
 
 ## Framework used
 Laravel
-## Laguna state polytechnic university - san pablo city campus
-Agnote Ageo V.
